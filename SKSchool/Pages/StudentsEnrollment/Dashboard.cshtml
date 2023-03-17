@@ -1,0 +1,32 @@
+﻿@page
+@model SKSchool.Pages.StudentsEnrollment.DashboardModel
+@{
+	ViewData["Title"] = "Enrolled Subjects";
+}
+<h1>@ViewData["Title"]</h1>
+<br />
+<div>
+	<a class="btn btn-primary btn-sm" href="/StudentsEnrollment/Create?roll_no=@Model.rollNo">Enroll in New Course</a>
+	<table class="table">
+		<thead>
+			<tr>
+				<th scope="col">S.N.</th>
+				<th scope="col">Course Name</th>
+				<th scope="col">Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var item in Model.subjectsList)
+			{
+				<tr>
+					<td>@Model.getIdx().</td>
+					<td>@item</td>
+					<td>
+						<a class="btn btn-primary btn-sm" href="/StudentsEnrollment/Edit?code=">Edit</a>
+						<a class="btn btn-primary btn-sm" href="/Branches/Delete?code=">Delete</a>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>

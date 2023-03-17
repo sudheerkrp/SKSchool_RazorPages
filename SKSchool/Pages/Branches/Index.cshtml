@@ -1,0 +1,33 @@
+﻿@page
+@model SKSchool.Pages.Branches.IndexModel
+@{
+	ViewData["Title"] = "Branches";
+}
+<h1>@ViewData["Title"]</h1>
+
+<br />
+<div>
+	<a class="btn btn-primary btn-sm" href="/Branches/Create">Add Branch</a>
+	<table class="table">
+		<thead>
+			<tr>
+				<th scope="col">Name</th>
+				<th scope="col">Updated On</th>
+				<th scope="col">Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach(var item in Model.branchesList)
+			{
+				<tr>
+					<td>@item.Name</td>
+					<td>@item.UpdatedOn</td>
+					<td>
+						<a class="btn btn-primary btn-sm" href="/Branches/Edit?code=@item.Code">Edit</a>
+						<a class="btn btn-primary btn-sm" href="/Branches/Delete?code=@item.Code">Delete</a>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>

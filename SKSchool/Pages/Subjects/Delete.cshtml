@@ -1,0 +1,18 @@
+﻿@page
+@using Dapper;
+@using System.Data.SqlClient;
+@{
+	try
+	{
+		Guid reqCode = new(Request.Query["code"]);
+		string connectionString = "Data Source=.\\sqlexpress;Initial Catalog=SK_School_DB;Integrated Security=True";
+		using SqlConnection connection = new(connectionString);
+		string sql = @"UPDATE Subjects SET active_bit = 0 WHERE code = @code";
+		await connection.ExecuteAsync(sql, new { code = reqCode });
+	}
+	catch (Exception ex)
+	{
+		Console.WriteLine("Exception : " + ex.Message);
+	}
+	Response.Redirect("/Subjects/Index");
+}

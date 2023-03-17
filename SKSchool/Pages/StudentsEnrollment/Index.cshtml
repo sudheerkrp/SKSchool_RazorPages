@@ -1,0 +1,39 @@
+﻿@page
+@model SKSchool.Pages.StudentsEnrollment.IndexModel
+@{
+	ViewData["Title"] = "Students-Enrollment";
+}
+<h1>@ViewData["Title"]</h1>
+
+<br />
+<div>
+	@if(Model.errorMsg.Length > 0)
+	{
+		<div class="alert alert-warning alert-dismissible fade show" role="alert">
+			<strong>@Model.errorMsg</strong>
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>		
+	}
+	<form method="post">
+		<div class="row mb-3">
+			<label class="col-sm-3 col-form-label">Roll No.</label>
+			<div class="col-sm-6">
+				@if (Model.rollNo == new Guid("00000000-0000-0000-0000-000000000000"))
+				{
+					<input type="text" class="form-control" name="roll_no" value="" placeholder="Enter your Roll No." />
+				}
+				else
+				{
+					<input type="text" class="form-control" name="roll_no" value="@Model.rollNo" placeholder="Enter your Roll No." />
+				}
+			</div>
+		</div>
+
+		<div class="row-mb-3">
+			<div class="row-sm-3">
+				<button class="btn btn-primary" type="submit">Submit</button>
+				<a class="btn btn-outline-primary" href="/Index" role="button">Cancel</a>
+			</div>
+		</div>
+	</form>
+</div>

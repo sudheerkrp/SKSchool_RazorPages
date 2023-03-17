@@ -1,0 +1,44 @@
+﻿@page
+@model SKSchool.Pages.Students.IndexModel
+@{
+	ViewData["Title"] = "Students";
+}
+<h1>@ViewData["Title"]</h1>
+
+<br />
+<div>
+	<a class="btn btn-primary btn-sm" href="/Students/Create">Add Student</a>
+	<table class="table">
+		<thead>
+			<tr>
+				<th scope="col">Roll No.</th>
+				<th scope="col">Name</th>
+				<th scope="col">Branch</th>
+				<th scope="col">Updated On</th>
+				<th scope="col">Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach(var item in Model.studentsList)
+			{
+				<tr>
+					<td>@item.RollNo</td>
+					<td>@item.Name</td>
+					@if(Model.branchMapping.ContainsKey(item.BranchCode))
+					{
+						<td>@Model.branchMapping[item.BranchCode]</td>
+					}
+					else
+					{
+						<td>@item.BranchCode</td>
+					}
+					<td>@item.UpdatedOn</td>
+					<td>
+						<a class="btn btn-primary btn-sm" href="/Students/Edit?roll_no=@item.RollNo">Edit</a>
+						<a class="btn btn-primary btn-sm" href="/Students/Delete?roll_no=@item.RollNo">Delete</a>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>
