@@ -8,58 +8,74 @@ namespace SKSchool.Pages.Teachers
 {
 	public class IndexModel : PageModel
 	{
-		public List<TeachersInfo> teachersList = new();
-		public Dictionary<Guid, string> branchMapping = new();
+		private readonly IDatabaseConnection databaseConnection;
+		public List<TeachersInfoJoinBranches> teachersList = new();
+		public TeachersInfo info = new();
+		public List<BranchesInfo> branchesList = new();
+		public string errorMsg = "";
 
-		//[Inject]
-		//public IDatabaseConnection Dbc { get; set; }
+		public IndexModel(IDatabaseConnection db)
+		{
+			databaseConnection = db;
+		}
 
 		public async Task OnGet()
 		{
 			try
 			{
-				/*using SqlConnection connection = Dbc.GetConnection();
-				string Sql = @"SELECT * FROM Branches WHERE active_bit = 1";
-				BranchesList = (List<BranchesInfo>)await Connection.QueryAsync<BranchesInfo>(Sql);*/
-
-				string connectionString = "Data Source=.\\sqlexpress;Initial Catalog=SK_School_DB;Integrated Security=True";
-				using SqlConnection connection = new(connectionString);
-				string sql1 = @"SELECT * FROM Teachers WHERE active_bit = 1";
+				using SqlConnection connection = databaseConnection.GetConnection();
+				string sql1 = @"SELECT id, Teachers.name AS name, branchCode, Teachers.update_on AS updatedOn, Branches.name AS branchName FROM Teachers JOIN Branches ON Teachers.branchCode = Branches.code WHERE Teachers.active_bit = 1 AND Branches.active_bit = 1 ORDER BY CAST(Teachers.name AS varchar)";
 				string sql2 = @"SELECT code, name FROM Branches WHERE active_bit = 1";
-				teachersList = new(await connection.QueryAsync<TeachersInfo>(sql1));
-				List<BranchInfo> branches = new(await connection.QueryAsync<BranchInfo>(sql2));
-				foreach (var ele in branches)
-					branchMapping.Add(ele.Code, ele.Name);
+				teachersList = new(await connection.QueryAsync<TeachersInfoJoinBranches>(sql1));
+				branchesList = new(await connection.QueryAsync<BranchesInfo>(sql2));
 			}
 			catch (Exception ex)
 			{
 				Console.WriteLine("Exception Index : " + ex.ToString());
 			}
 		}
-	}
 
-	public class TeachersInfo
-	{
-		//[Inject]
-		//public IDatabaseConnection Dbc { get; set; }
-
-		public Guid Id { get; set; }
-		public string Name { get; set; }
-		public Guid BranchCode { get; set; }
-		public bool ActiveBit { get; set; } = true;
-		public DateTime UpdatedOn { get; set; } = DateTime.Now;
-
-		public TeachersInfo()
+		public async Task OnPostDeleteTeacher()
 		{
-			Name = "";
+			try
+			{
+				Guid reqId = new(Request.Form["id"]);
+				using SqlConnection connection = databaseConnection.GetConnection();
+				string sql = @"UPDATE Teachers SET active_bit = 0, update_on = @currentDateTime WHERE id = @id";
+				await connection.ExecuteAsync(sql, new { id = reqId, currentDateTime = DateTime.UtcNow});
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("Exception Delete : " + ex.Message);
+			}
+			Response.Redirect("/Teachers");
 		}
-		public TeachersInfo(Guid id, string name, Guid branchCode, bool activeBit, DateTime updatedOn)
+
+		public async Task OnPostEditTeacher()
 		{
-			Id = id;
-			Name = name;
-			BranchCode = branchCode;
-			ActiveBit = activeBit;
-			UpdatedOn = updatedOn;
+			info.Id = new(Request.Form["id"]);
+			info.Name = Request.Form["name"];
+			if (info.Name.Length == 0 || Request.Form["branch_code"] == "select")
+			{
+				errorMsg = "Branch Name is required!";
+				Console.WriteLine("Eidt.cs2 : " + errorMsg);
+				return;
+			}
+			info.BranchCode = new(Request.Form["branch_code"]);
+
+			try
+			{
+				using SqlConnection connection = databaseConnection.GetConnection();
+				string sql = @"UPDATE Teachers SET name = @name, branchCode = @branchCode, update_on = @currentDateTime WHERE id = @id";
+				await connection.ExecuteAsync(sql, new { name = info.Name, branchCode = info.BranchCode, currentDateTime = DateTime.UtcNow, id = info.Id });
+			}
+			catch (Exception ex)
+			{
+				errorMsg = ex.Message;
+				Console.WriteLine("Eidt.cs3 : " + errorMsg);
+				return;
+			}
+			Response.Redirect("/Teachers");
 		}
 	}
 }

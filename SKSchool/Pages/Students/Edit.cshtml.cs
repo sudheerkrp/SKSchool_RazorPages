@@ -1,5 +1,6 @@
 using Dapper;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SKSchool.DataClass;
 using SKSchool.Pages.Branches;
 using SKSchool.Pages.Teachers;
 using System.Data.SqlClient;

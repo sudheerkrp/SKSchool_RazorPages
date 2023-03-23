@@ -18,10 +18,10 @@
 		<div class="row mb-3">
 			<div class="form-group">
 				<label class="col-sm-3 col-form-label">Student Name</label>
-				<input type="text" class="form-control" name="name" value="@Model.info.Name" placeholder="Enter Name of the Student" />
+				<input type="text" class="form-control" name="name" value="@Model.info.Name" placeholder="Enter Name of the Student" required/>
 			</div>
 			<div class="form-group">
-				<label class="col-sm-3 col-form-label">Student Branch</label>
+				<label class="col-sm-3 col-form-label">Branch Name</label>
 				<select name="branch_code" class="form-select" aria-label="Default select example">
 				  <option value="select">Select</option>
 				  @foreach(var item in Model.branchesList)

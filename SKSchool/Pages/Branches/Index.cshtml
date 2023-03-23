@@ -7,25 +7,79 @@
 
 <br />
 <div>
+	@if (Model.errorMsg.Length > 0)
+	{
+		<div class="alert alert-warning alert-dismissible fade show" role="alert">
+			<strong>@Model.errorMsg</strong>
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+	}
 	<a class="btn btn-primary btn-sm" href="/Branches/Create">Add Branch</a>
 	<table class="table">
 		<thead>
 			<tr>
-				<th scope="col">Name</th>
-				<th scope="col">Updated On</th>
 				<th scope="col">Actions</th>
+				<th scope="col">Branch Name</th>
+				<th scope="col">Updated On</th>
 			</tr>
 		</thead>
 		<tbody>
 			@foreach(var item in Model.branchesList)
 			{
 				<tr>
-					<td>@item.Name</td>
-					<td>@item.UpdatedOn</td>
 					<td>
-						<a class="btn btn-primary btn-sm" href="/Branches/Edit?code=@item.Code">Edit</a>
-						<a class="btn btn-primary btn-sm" href="/Branches/Delete?code=@item.Code">Delete</a>
+						<button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editModal-@item.Code">Edit</button>
+						<div class="modal fade" id="editModal-@item.Code" tabindex="-1" aria-labelledby="editModalLabel-@item.Code" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h1 class="modal-title fs-5" id="editModalLabel-@item.Code">Edit Branch</h1>
+										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+									</div>
+									<div class="modal-body">
+										<form method="post" asp-page-handler="EditBranch">
+											<input type="hidden" name="code" value="@item.Code" />
+											<div class="row mb-3">
+												<label class="col-sm-3 col-form-label">Branch Name</label>
+												<div class="col-sm-6">
+													<input type="text" class="form-control" name="name" value="@item.Name" placeholder="Enter Name of the Branch" required/>
+												</div>
+											</div>
+											<div class="modal-footer">
+												<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+												<button type="submit" class="btn btn-primary">Edit</button>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@item.Code">Delete</button>
+						<div class="modal fade" id="deleteModal-@item.Code" tabindex="-1" aria-labelledby="deleteModalLabel-@item.Code" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h1 class="modal-title fs-5" id="deleteModalLabel-@item.Code">Delete Branch</h1>
+										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+									</div>
+									<div class="modal-body">
+										<h3>Are you Sure?</h3>
+										<p>Deletion may cause data loss.</p>
+										<form method="post" asp-page-handler="DeleteBranch">
+											<input type="hidden" name="code" value="@item.Code" />
+											<div class="modal-footer">
+												<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+												<button type="submit" class="btn btn-primary">Delete</button>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
 					</td>
+					<td>@item.Name</td>
+					<td>@item.UpdatedOn.ToLocalTime()</td>
 				</tr>
 			}
 		</tbody>

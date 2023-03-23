@@ -1,13 +1,20 @@
 using Dapper;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SKSchool.DataClass;
 using System.Data.SqlClient;
 
 namespace SKSchool.Pages.Subjects
 {
 	public class CreateModel : PageModel
 	{
+		private readonly IDatabaseConnection databaseConnection;
 		public SubjectsInfo info = new();
 		public string errorMsg = "";
+
+		public CreateModel(IDatabaseConnection db)
+		{
+			databaseConnection = db;
+		}
 
 		public async Task OnPost()
 		{
@@ -20,8 +27,7 @@ namespace SKSchool.Pages.Subjects
 
 			try
 			{
-				string connectionString = "Data Source=.\\sqlexpress;Initial Catalog=SK_School_DB;Integrated Security=True";
-				using SqlConnection connection = new(connectionString);
+				using SqlConnection connection = databaseConnection.GetConnection();
 				string sql = @"INSERT INTO Subjects(code, name, update_on) VALUES(newid(), @name, @currentDateTime)";
 				await connection.ExecuteAsync(sql, new { name = info.Name, currentDateTime = info.UpdatedOn });
 			}
@@ -30,10 +36,7 @@ namespace SKSchool.Pages.Subjects
 				errorMsg = ex.Message;
 				return;
 			}
-			info.Name = "";
 			Response.Redirect("/Subjects/Index");
 		}
-
-
 	}
 }

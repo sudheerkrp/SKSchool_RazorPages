@@ -1,7 +1,7 @@
 ﻿@page
-@model SKSchool.Pages.Students.CreateModel
+@model SKSchool.Pages.StudentsEnrollment.CreateModel
 @{
-	ViewData["Title"] = "New Student";
+	ViewData["Title"] = "New Course Enrollment";
 }
 <h1>@ViewData["Title"]</h1>
 
@@ -16,26 +16,23 @@
 	}
 	<form method="post">
 		<div class="row mb-3">
-			@*<div class="form-group">
-				<label class="col-sm-3 col-form-label">Course Name</label>
-				<input type="text" class="form-control" name="name" value="@Model.info.Name" placeholder="Enter Name of the Student" />
-			</div>
+			<input type="hidden" name="roll_no" value="@Model.info.RollNo" />
 			<div class="form-group">
-				<label class="col-sm-3 col-form-label">Student Branch</label>
-				<select name="branch_code" class="form-select" aria-label="Default select example">
+				<label class="col-sm-3 col-form-label">Subject Name</label>
+				<select name="subj_code" class="form-select" aria-label="Default select example">
 					<option value="select">Select</option>
-					@foreach (var item in Model.branchesList)
+					@foreach (var item in Model.subjectsList)
 					{
 						<option value="@item.Code">@item.Name</option>
 					}
 				</select>
-			</div>*@
+			</div>
 		</div>
 
 		<div class="row-mb-3">
 			<div class="row-sm-3">
 				<button class="btn btn-primary" type="submit">Submit</button>
-				<a class="btn btn-outline-primary" href="/Students/Index" role="button">Cancel</a>
+				<a class="btn btn-outline-primary" href="/StudentsEnrollment/Dashboard?roll_no=@Model.info.RollNo" role="button">Cancel</a>
 			</div>
 		</div>
 	</form>

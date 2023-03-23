@@ -1,13 +1,20 @@
 using Dapper;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SKSchool.DataClass;
 using System.Data.SqlClient;
 
 namespace SKSchool.Pages.Branches
 {
     public class CreateModel : PageModel
     {
-        public BranchesInfo info = new();
+		private readonly IDatabaseConnection databaseConnection;
+		public BranchesInfo info = new();
         public string errorMsg = "";
+
+		public CreateModel(IDatabaseConnection db)
+		{
+			databaseConnection = db;
+		}
 
 		public async Task OnPost()
 		{
@@ -20,8 +27,7 @@ namespace SKSchool.Pages.Branches
 
 			try
 			{
-				string connectionString = "Data Source=.\\sqlexpress;Initial Catalog=SK_School_DB;Integrated Security=True";
-				using SqlConnection connection = new(connectionString);
+				using SqlConnection connection = databaseConnection.GetConnection();
 				string sql = @"INSERT INTO Branches(code, name, update_on) VALUES(newid(), @name, @currentDateTime)";
 				await connection.ExecuteAsync(sql, new { name = info.Name, currentDateTime = info.UpdatedOn });
 			}
@@ -30,10 +36,7 @@ namespace SKSchool.Pages.Branches
 				errorMsg = ex.Message;
 				return;
 			}
-			info.Name = "";
-			Response.Redirect("/Branches/Index");
+			Response.Redirect("/Branches");
 		}
-
-
 	}
 }

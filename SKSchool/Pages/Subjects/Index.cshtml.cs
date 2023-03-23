@@ -1,57 +1,75 @@
 using Dapper;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SKSchool.DataClass;
 using System.Data.SqlClient;
 
 namespace SKSchool.Pages.Subjects
 {
     public class IndexModel : PageModel
     {
-		public List<SubjectsInfo> subjectsList = new();
 
-		//[Inject]
-		//public IDatabaseConnection Dbc { get; set; }
+		private readonly IDatabaseConnection databaseConnection;
+		public List<SubjectsInfo> subjectsList = new();
+		public BranchesInfo info = new();
+		public string errorMsg = "";
+
+		public IndexModel(IDatabaseConnection db)
+		{
+			databaseConnection = db;
+		}
 
 		public async Task OnGet()
 		{
 			try
 			{
-				/*using var Connection = Dbc.GetConnection();
-				string Sql = @"SELECT * FROM Branches WHERE active_bit = 1";
-				BranchesList = (List<BranchesInfo>)await Connection.QueryAsync<BranchesInfo>(Sql);*/
-
-				string connectionString = "Data Source=.\\sqlexpress;Initial Catalog=SK_School_DB;Integrated Security=True";
-				using SqlConnection connection = new(connectionString);
-				string sql = @"SELECT * FROM Subjects WHERE active_bit = 1";
+				using SqlConnection connection = databaseConnection.GetConnection();
+				string sql = @"SELECT code, name, update_on AS updatedOn FROM Subjects WHERE active_bit = 1";
 				subjectsList = (List<SubjectsInfo>)await connection.QueryAsync<SubjectsInfo>(sql);
-
 			}
 			catch (Exception ex)
 			{
 				Console.WriteLine("Exception : " + ex.ToString());
 			}
 		}
-	}
 
-	public class SubjectsInfo
-	{
-		//[Inject]
-		//public IDatabaseConnection Dbc { get; set; }
-
-		public Guid Code { get; set; }
-		public string Name { get; set; }
-		public bool ActiveBit { get; set; } = true;
-		public DateTime UpdatedOn { get; set; } = DateTime.Now;
-
-		public SubjectsInfo()
+		public async Task OnPostDeleteSubject()
 		{
-			Name = "";
+			try
+			{
+				Guid reqCode = new(Request.Form["code"]);
+				using SqlConnection connection = databaseConnection.GetConnection();
+				string sql = @"UPDATE Subjects SET active_bit = 0, update_on = @currentDateTime WHERE code = @code";
+				await connection.ExecuteAsync(sql, new { code = reqCode, currentDateTime = DateTime.UtcNow });
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("Exception : " + ex.Message);
+			}
+			Response.Redirect("/Subjects");
 		}
-		public SubjectsInfo(Guid code, string name, bool activeBit, DateTime updatedOn)
+
+		public async Task OnPostEditSubject()
 		{
-			Code = code;
-			Name = name;
-			ActiveBit = activeBit;
-			UpdatedOn = updatedOn;
+			info.Code = new Guid(Request.Form["code"]);
+			info.Name = Request.Form["name"];
+			if (info.Name.Length == 0)
+			{
+				errorMsg = "Branch Name is required!";
+				return;
+			}
+
+			try
+			{
+				using SqlConnection connection = databaseConnection.GetConnection();
+				string sql = @"UPDATE Subjects SET name = @name, update_on = @currentDateTime WHERE code = @code";
+				await connection.ExecuteAsync(sql, new { name = info.Name, currentDateTime = DateTime.UtcNow, code = info.Code });
+			}
+			catch (Exception ex)
+			{
+				errorMsg = ex.Message;
+				return;
+			}
+			Response.Redirect("/Subjects");
 		}
 	}
 }

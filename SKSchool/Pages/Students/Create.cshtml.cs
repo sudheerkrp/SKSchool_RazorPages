@@ -1,5 +1,6 @@
 using Dapper;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SKSchool.DataClass;
 using SKSchool.Pages.Branches;
 using System.Data.SqlClient;
 
@@ -7,23 +8,23 @@ namespace SKSchool.Pages.Students
 {
 	public class CreateModel : PageModel
 	{
+		private readonly IDatabaseConnection databaseConnection;
 		public StudentsInfo info = new();
 		public List<BranchesInfo> branchesList = new();
 		public string errorMsg = "";
+
+		public CreateModel(IDatabaseConnection db)
+		{
+			databaseConnection = db;
+		}
 
 		public async Task OnGet()
 		{
 			try
 			{
-				/*using var Connection = Dbc.GetConnection();
-				string Sql = @"SELECT * FROM Branches WHERE active_bit = 1";
-				BranchesList = (List<BranchesInfo>)await Connection.QueryAsync<BranchesInfo>(Sql);*/
-
-				string connectionString = "Data Source=.\\sqlexpress;Initial Catalog=SK_School_DB;Integrated Security=True";
-				using SqlConnection connection = new(connectionString);
+				using SqlConnection connection = databaseConnection.GetConnection();
 				string sql = @"SELECT * FROM Branches WHERE active_bit = 1";
 				branchesList = (List<BranchesInfo>)await connection.QueryAsync<BranchesInfo>(sql);
-
 			}
 			catch (Exception ex)
 			{
@@ -43,8 +44,7 @@ namespace SKSchool.Pages.Students
 
 			try
 			{
-				string connectionString = "Data Source=.\\sqlexpress;Initial Catalog=SK_School_DB;Integrated Security=True";
-				using SqlConnection connection = new(connectionString);
+				using SqlConnection connection = databaseConnection.GetConnection();
 				string sql = @"INSERT INTO Students(rollNo, name, branchCode, update_on) VALUES(newid(), @name, @branchCode, @currentDateTime)";
 				await connection.ExecuteAsync(sql, new { name = info.Name, branchCode = info.BranchCode, currentDateTime = info.UpdatedOn });
 			}
@@ -53,10 +53,7 @@ namespace SKSchool.Pages.Students
 				errorMsg = ex.Message;
 				return;
 			}
-			info.Name = "";
-			Response.Redirect("/Students/Index");
+			Response.Redirect("/Students");
 		}
-
-
 	}
 }

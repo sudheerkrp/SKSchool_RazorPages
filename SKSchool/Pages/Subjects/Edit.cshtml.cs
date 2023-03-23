@@ -1,5 +1,6 @@
 using Dapper;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SKSchool.DataClass;
 using System.Data.SqlClient;
 
 namespace SKSchool.Pages.Subjects

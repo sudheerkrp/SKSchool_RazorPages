@@ -1,5 +1,6 @@
 using Dapper;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SKSchool.DataClass;
 using SKSchool.Pages.Branches;
 using System.Data.SqlClient;
 
@@ -7,16 +8,21 @@ namespace SKSchool.Pages.Teachers
 {
 	public class CreateModel : PageModel
 	{
+		private readonly IDatabaseConnection databaseConnection;
 		public TeachersInfo info = new();
 		public List<BranchesInfo> branchesList = new();
 		public string errorMsg = "";
+
+		public CreateModel(IDatabaseConnection db)
+		{
+			databaseConnection = db;
+		}
 
 		public async Task OnGet()
 		{
 			try
 			{
-				string connectionString = "Data Source=.\\sqlexpress;Initial Catalog=SK_School_DB;Integrated Security=True";
-				using SqlConnection connection = new(connectionString);
+				using SqlConnection connection = databaseConnection.GetConnection();
 				string sql = @"SELECT * FROM Branches WHERE active_bit = 1";
 				branchesList = new(await connection.QueryAsync<BranchesInfo>(sql));
 			}
@@ -41,8 +47,7 @@ namespace SKSchool.Pages.Teachers
 
 			try
 			{
-				string connectionString = "Data Source=.\\sqlexpress;Initial Catalog=SK_School_DB;Integrated Security=True";
-				using SqlConnection connection = new(connectionString);
+				using SqlConnection connection = databaseConnection.GetConnection();
 				string sql = @"INSERT INTO Teachers(id, name, branchCode, active_bit, update_on) VALUES(newid(), @name, @branchCode, 1, @currentDateTime)";
 				await connection.ExecuteAsync(sql, new { name = info.Name, branchCode = info.BranchCode, currentDateTime = info.UpdatedOn });
 			}
@@ -53,7 +58,7 @@ namespace SKSchool.Pages.Teachers
 				return;
 			}
 			info.Name = "";
-			Response.Redirect("/Teachers/Index");
+			Response.Redirect("/Teachers");
 		}
 
 

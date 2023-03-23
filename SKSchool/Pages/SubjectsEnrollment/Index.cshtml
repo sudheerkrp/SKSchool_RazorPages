@@ -1,4 +1,121 @@
 ﻿@page
 @model SKSchool.Pages.SubjectsEnrollment.IndexModel
 @{
+	ViewData["Title"] = "Subjects Enrollment";
 }
+<h1>@ViewData["Title"]</h1>
+
+<br />
+<div>
+	@if (Model.errorMsg.Length > 0)
+	{
+		<div class="alert alert-warning alert-dismissible fade show" role="alert">
+			<strong>@Model.errorMsg</strong>
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+	}
+	<a class="btn btn-primary btn-sm" href="/SubjectsEnrollment/Create">New Enrollment</a>
+	<table class="table">
+		<thead>
+			<tr>
+				<th scope="col">Actions</th>
+				<th scope="col">Branch Name</th>
+				<th scope="col">Subject Name</th>
+				<th scope="col">Updated On</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var item in Model.enrollmentList)
+			{
+				<tr>
+					<td>
+						<button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editModal-@item.SubjCode-@item.BranchCode">Edit</button>
+						<div class="modal fade" id="editModal-@item.SubjCode-@item.BranchCode" tabindex="-1" aria-labelledby="editModalLabel-@item.SubjCode-@item.BranchCode" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h1 class="modal-title fs-5" id="editModalLabel-@item.SubjCode-@item.BranchCode">Edit Subject Enrollment</h1>
+										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+									</div>
+									<div class="modal-body">
+										<form method="post" asp-page-handler="EditSubjectEnrollment">
+											<input type="hidden" name="old_subj_code" value="@item.SubjCode" />
+											<input type="hidden" name="old_branch_code" value="@item.BranchCode" />
+											<div class="row mb-3">
+												<div class="form-group">
+													<label class="col-sm-4 col-form-label">Subject Name</label>
+													<select name="new_subj_code" class="form-select" aria-label="Default select example">
+														<option value="select">Select</option>
+														@foreach (var item1 in Model.subjectsList)
+														{
+															if (item1.Code == item.SubjCode)
+															{
+																<option selected value="@item1.Code">@item1.Name</option>
+															}
+															else
+															{
+																<option value="@item1.Code">@item1.Name</option>
+															}
+														}
+													</select>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-4 col-form-label">Branch Name</label>
+													<select name="new_branch_code" class="form-select" aria-label="Default select example">
+														<option value="select">Select</option>
+														@foreach (var item1 in Model.branchesList)
+														{
+															if (item1.Code == item.BranchCode)
+															{
+																<option selected value="@item1.Code">@item1.Name</option>
+															}
+															else
+															{
+																<option value="@item1.Code">@item1.Name</option>
+															}
+														}
+													</select>
+												</div>
+											</div>
+											<div class="modal-footer">
+												<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+												<button type="submit" class="btn btn-primary">Edit</button>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@item.SubjCode-@item.BranchCode">Delete</button>
+						<div class="modal fade" id="deleteModal-@item.SubjCode-@item.BranchCode" tabindex="-1" aria-labelledby="deleteModalLabel-@item.SubjCode-@item.BranchCode" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h1 class="modal-title fs-5" id="deleteModalLabel-@item.SubjCode-@item.BranchCode">Delete Subject Enrollment</h1>
+										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+									</div>
+									<div class="modal-body">
+										<h3>Are you Sure?</h3>
+										<p>Deletion may cause data loss.</p>
+										<form method="post" asp-page-handler="DeleteSubjectEnrollment">
+											<input type="hidden" name="subj_code" value="@item.SubjCode" />
+											<input type="hidden" name="branch_code" value="@item.BranchCode" />
+											<div class="modal-footer">
+												<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+												<button type="submit" class="btn btn-primary">Delete</button>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+					</td>
+					<td>@item.BranchName</td>
+					<td>@item.SubjectName</td>
+					<td>@item.UpdatedOn.ToLocalTime()</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>

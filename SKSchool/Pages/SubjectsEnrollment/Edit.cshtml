@@ -1,4 +1,62 @@
 ﻿@page
 @model SKSchool.Pages.SubjectsEnrollment.EditModel
 @{
+	ViewData["Title"] = "Edit Enrollment";
 }
+<h1>@ViewData["Title"]</h1>
+
+<br />
+<div>
+	@if (Model.errorMsg.Length > 0)
+	{
+		<div class="alert alert-warning alert-dismissible fade show" role="alert">
+			<strong>@Model.errorMsg</strong>
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+	}
+	<form method="post">
+		<div class="row mb-3">
+			<div class="form-group">
+				<label class="col-sm-3 col-form-label">Subject Name</label>
+				<select name="subj_code" class="form-select" aria-label="Default select example">
+					<option value="select">Select</option>
+					@foreach (var item in Model.subjectsList)
+					{
+						if(item.Code == Model.oldInfo.SubjCode)
+						{
+							<option selected value="@item.Code">@item.Name</option>
+						}
+						else
+						{
+							<option value="@item.Code">@item.Name</option>
+						}
+					}
+				</select>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 col-form-label">Branch Name</label>
+				<select name="branch_code" class="form-select" aria-label="Default select example">
+					<option value="select">Select</option>
+					@foreach (var item in Model.branchesList)
+					{
+						if(item.Code == Model.oldInfo.BranchCode)
+						{
+							<option selected value="@item.Code">@item.Name</option>
+						}
+						else
+						{
+							<option value="@item.Code">@item.Name</option>
+						}
+					}
+				</select>
+			</div>
+		</div>
+
+		<div class="row-mb-3">
+			<div class="row-sm-3">
+				<button class="btn btn-primary" type="submit">Submit</button>
+				<a class="btn btn-outline-primary" href="/SubjectsEnrollment/Index" role="button">Cancel</a>
+			</div>
+		</div>
+	</form>
+</div>

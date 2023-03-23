@@ -18,13 +18,13 @@
 		<div class="row mb-3">
 			<label class="col-sm-3 col-form-label">Roll No.</label>
 			<div class="col-sm-6">
-				@if (Model.rollNo == new Guid("00000000-0000-0000-0000-000000000000"))
+				@if(Model.regNo == 0)
 				{
-					<input type="text" class="form-control" name="roll_no" value="" placeholder="Enter your Roll No." />
+					<input type="text" class="form-control" name="reg_no" placeholder="Enter your Roll No." required/>
 				}
 				else
 				{
-					<input type="text" class="form-control" name="roll_no" value="@Model.rollNo" placeholder="Enter your Roll No." />
+					<input type="text" class="form-control" name="reg_no" value="@Model.regNo" placeholder="Enter your Roll No." required/>
 				}
 			</div>
 		</div>

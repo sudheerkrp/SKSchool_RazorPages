@@ -2,41 +2,104 @@
 @model SKSchool.Pages.Teachers.IndexModel
 @{
 	ViewData["Title"] = "Teachers";
+	int empNo = 1;
 }
 <h1>@ViewData["Title"]</h1>
 
 <br />
 <div>
+	@if (Model.errorMsg.Length > 0)
+	{
+		<div class="alert alert-warning alert-dismissible fade show" role="alert">
+			<strong>@Model.errorMsg</strong>
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+	}
 	<a class="btn btn-primary btn-sm" href="/Teachers/Create">Add Teacher</a>
 	<table class="table">
 		<thead>
 			<tr>
-				<th scope="col">Id</th>
-				<th scope="col">Name</th>
-				<th scope="col">Branch</th>
-				<th scope="col">Updated On</th>
 				<th scope="col">Actions</th>
+				<th scope="col">Employee No.</th>
+				<th scope="col">Teacher Name</th>
+				<th scope="col">Branch Name</th>
+				<th scope="col">Updated On</th>
 			</tr>
 		</thead>
 		<tbody>
 			@foreach (var item in Model.teachersList)
 			{
 				<tr>
-					<td>@item.Id</td>
-					<td>@item.Name</td>
-					@if (Model.branchMapping.ContainsKey(item.BranchCode))
-					{
-						<td>@Model.branchMapping[item.BranchCode]</td>
-					}
-					else
-					{
-						<td>@item.BranchCode</td>
-					}
-					<td>@item.UpdatedOn</td>
 					<td>
-						<a class="btn btn-primary btn-sm" href="/Teachers/Edit?id=@item.Id">Edit</a>
-						<a class="btn btn-primary btn-sm" href="/Teachers/Delete?id=@item.Id">Delete</a>
+						<button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editModal-@item.Id">Edit</button>
+						<div class="modal fade" id="editModal-@item.Id" tabindex="-1" aria-labelledby="editModalLabel-@item.Id" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h1 class="modal-title fs-5" id="editModalLabel-@item.Id">Edit Branch</h1>
+										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+									</div>
+									<div class="modal-body">
+										<form method="post" asp-page-handler="EditTeacher">
+											<input type="hidden" name="id" value="@item.Id" />
+											<div class="form-group">
+												<label class="col-sm-4 col-form-label">Teacher Name</label>
+												<input type="text" class="form-control" name="name" value="@item.Name" placeholder="Enter Name of the Teacher" required/>
+											</div>
+											<div class="form-group">
+												<label class="col-sm-3 col-form-label">Branch Name</label>
+												<select class="form-select" aria-label="Default select example" name="branch_code">
+													<option value="select">Select</option>
+														@foreach (var item1 in Model.branchesList)
+														{
+															if (item1.Code == item.BranchCode)
+															{
+															<option selected value="@item1.Code">@item1.Name</option>
+															}
+															else
+															{
+															<option value="@item1.Code">@item1.Name</option>
+															}
+														}
+												</select>
+											</div>
+											<div class="modal-footer">
+												<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+												<button type="submit" class="btn btn-primary">Edit</button>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@item.Id">Delete</button>
+						<div class="modal fade" id="deleteModal-@item.Id" tabindex="-1" aria-labelledby="deleteModalLabel-@item.Id" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h1 class="modal-title fs-5" id="deleteModalLabel-@item.Id">Delete Teacher</h1>
+										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+									</div>
+									<div class="modal-body">
+										<h3>Are you Sure?</h3>
+										<p>Deletion may cause data loss.</p>
+										<form method="post" asp-page-handler="DeleteTeacher">
+											<input type="hidden" name="id" value="@item.Id" />
+											<div class="modal-footer">
+												<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+												<button type="submit" class="btn btn-primary">Delete</button>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
 					</td>
+					<td>@(empNo++)</td>
+					<td>@item.Name</td>
+					<td>@item.BranchName</td>
+					<td>@item.UpdatedOn.ToLocalTime()</td>
 				</tr>
 			}
 		</tbody>

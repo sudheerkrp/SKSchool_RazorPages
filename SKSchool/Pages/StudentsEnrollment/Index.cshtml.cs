@@ -1,45 +1,42 @@
 using Dapper;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SKSchool.DataClass;
 using System.Data.SqlClient;
-using System.Text.RegularExpressions;
 
 namespace SKSchool.Pages.StudentsEnrollment
 {
 	public class IndexModel : PageModel
 	{
-		private static bool IsGuid(string guidString)
-		{
-			bool IsGuid = false;
-			if (!string.IsNullOrEmpty(guidString))
-			{
-				Regex guidRegExp = new(@"^(\{{0,1}([0-9a-fA-F]){8}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){12}\}{0,1})$");
-				IsGuid = guidRegExp.IsMatch(guidString);
-			}
-			return IsGuid;
-		}
-		public string errorMsg = "";
+		private readonly IDatabaseConnection databaseConnection;
+		public int regNo;
 		public Guid rollNo;
+		public string errorMsg = "";
+
+		public IndexModel(IDatabaseConnection db)
+		{
+			databaseConnection = db;
+		}
 
 		public async Task OnPost()
 		{
-			
-			if (!IsGuid(Request.Form["roll_no"]))
+			if(!(int.TryParse(Request.Form["reg_no"], out regNo)))
 			{
-				errorMsg = "Please Enter Valid Roll No.";
+				errorMsg = "Invalid Roll No.";
 				return;
 			}
-			rollNo = new(Request.Form["roll_no"]);
+
 			try
 			{
-				string connectionString = "Data Source=.\\sqlexpress;Initial Catalog=SK_School_DB;Integrated Security=True";
-				using SqlConnection connection = new(connectionString);
-				string sql = @"SELECT COUNT(*) FROM Students WHERE rollNo = @_rollNo";
-				int cnt = await connection.QuerySingleAsync<int>(sql, new { _rollNo = rollNo });
-				if(cnt == 0)
+				using SqlConnection connection = databaseConnection.GetConnection();
+				string sql1 = @"SELECT COUNT(*) FROM (SELECT ROW_NUMBER() OVER (ORDER BY CAST(Students.name AS varchar)) AS regNo, rollNo, Students.name, Students.branchCode FROM Students JOIN Branches ON branchCode = code WHERE Students.active_bit = 1 AND Branches.active_bit = 1) AS TEMP WHERE regNo = @regNo";
+				string sql2 = @"SELECT rollNo FROM (SELECT ROW_NUMBER() OVER (ORDER BY CAST(Students.name AS varchar)) AS regNo, rollNo, Students.name, Students.branchCode FROM Students JOIN Branches ON branchCode = code WHERE Students.active_bit = 1 AND Branches.active_bit = 1) AS TEMP WHERE regNo = @regNo";
+				int cnt = await connection.QuerySingleAsync<int>(sql1, new { regNo });
+				if(cnt < 1)
 				{
 					errorMsg = "Invalid Roll No.";
 					return;
 				}
+				rollNo = await connection.QuerySingleAsync<Guid>(sql2, new { regNo });
 			}
 			catch (Exception ex)
 			{
@@ -48,7 +45,5 @@ namespace SKSchool.Pages.StudentsEnrollment
 			}
 			Response.Redirect($"/StudentsEnrollment/Dashboard?roll_no={rollNo}");
 		}
-
-
 	}
 }
