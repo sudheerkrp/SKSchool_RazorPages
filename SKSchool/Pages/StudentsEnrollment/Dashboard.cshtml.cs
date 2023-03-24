@@ -41,8 +41,8 @@ namespace SKSchool.Pages.StudentsEnrollment
 				string sql2 = @"SELECT rollNo, Students.name AS name, branchCode, Students.update_on AS updatedOn, Branches.name AS branchName FROM Students JOIN Branches ON Students.branchCode = Branches.code WHERE Students.rollNo = @rollNo AND Students.active_bit = 1 AND Branches.active_bit = 1";
 				info = await connection.QuerySingleAsync<StudentsInfoJoinBranches>(sql2, new { rollNo });
 				string sql3 = @"SELECT Students_Enrollment.rollNo AS rollNo, Students_Enrollment.subjCode AS subjCode,
-							   Students_Enrollment.update_on AS updatedOn,Subjects.name AS subjectName, 
-							   Teachers.name AS teacherName FROM Subjects JOIN Students_Enrollment
+							   Students_Enrollment.update_on AS updatedOn, Subjects.name AS subjectName, 
+							   Teachers.name AS teacherName FROM Students_Enrollment JOIN Subjects 
 							   ON Subjects.code = Students_Enrollment.subjCode JOIN Teachers_Enrollment ON 
 							   Students_Enrollment.subjCode = Teachers_Enrollment.subjCode JOIN Teachers ON Teachers_Enrollment.empId = Teachers.id WHERE 
 							   rollNo = @rollNo AND Students_Enrollment.active_bit = 1 AND 
@@ -101,10 +101,10 @@ namespace SKSchool.Pages.StudentsEnrollment
 				cnt = await connection.QuerySingleAsync<int>(sql2, new { rollNo, newSubjCode });
 				if(cnt != 0)
 				{
-					string sql3 = @"UPDATE Students_Enrollment SET active_bit = 1, update_on = @currentDateTime WHERE rollNo = @rollNo AND subjCode = @newSubjCode";
-					await connection.ExecuteAsync(sql3, new { currentDateTime = DateTime.UtcNow, rollNo, newSubjCode });
-					string sql4 = @"UPDATE Students_Enrollment SET active_bit = 0, update_on = @currentDateTime WHERE rollNo = @rollNo AND subjCode = @oldSubjCode";
-					await connection.ExecuteAsync(sql4, new { currentDateTime = DateTime.UtcNow, rollNo, oldSubjCode });
+					string sql3 = @"UPDATE Students_Enrollment SET active_bit = 0, update_on = @currentDateTime WHERE rollNo = @rollNo AND subjCode = @oldSubjCode";
+					await connection.ExecuteAsync(sql3, new { currentDateTime = DateTime.UtcNow, rollNo, oldSubjCode });
+					string sql4 = @"UPDATE Students_Enrollment SET active_bit = 1, update_on = @currentDateTime WHERE rollNo = @rollNo AND subjCode = @newSubjCode";
+					await connection.ExecuteAsync(sql4, new { currentDateTime = DateTime.UtcNow, rollNo, newSubjCode });
 				}
 				else
 				{

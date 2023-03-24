@@ -60,11 +60,11 @@ namespace SKSchool.Pages.StudentsEnrollment
 			try
 			{
 				using SqlConnection connection = databaseConnection.GetConnection();
-				string sql1 = @"SELECT COUNT(*) FROM Students_Enrollment WHERE rollNo = @rollNo AND subjCode = @subjectCode AND active_bit = 1";
+				string sql1 = @"SELECT COUNT(*) FROM Students_Enrollment WHERE rollNo = @rollNo AND active_bit = 1 AND subjCode = @subjectCode";
 				int cnt = await connection.QuerySingleAsync<int>(sql1, new { rollNo = info.RollNo, subjectCode = info.SubjCode });
 				if (cnt != 0)
 				{
-					errorMsg = "You are already enrolled in this Subjec!";
+					errorMsg = "You are already enrolled in this Subject!";
 					return;
 				}
 				string sql2 = @"SELECT COUNT(*) FROM Students_Enrollment WHERE rollNo = @rollNo AND active_bit = 1";

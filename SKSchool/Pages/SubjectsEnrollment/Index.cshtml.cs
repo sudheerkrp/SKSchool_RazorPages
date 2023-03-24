@@ -75,15 +75,28 @@ namespace SKSchool.Pages.SubjectsEnrollment
 			try
 			{
 				using SqlConnection connection = databaseConnection.GetConnection();
-				string sql1 = @"SELECT COUNT(*) FROM Subjects_Enrollment WHERE subjCode = @subjCode AND branchCode = @branchCode";
-				string sql2 = @"UPDATE Subjects_Enrollment SET subjCode = @newSubjCode, branchCode = @newBranchCode, update_on = @currentDateTime WHERE subjCode = @oldSubjCode AND branchCode = @oldBranchCode";
+				string sql1 = @"SELECT COUNT(*) FROM Subjects_Enrollment WHERE subjCode = @subjCode AND branchCode = @branchCode AND active_bit = 1";
 				int cnt = await connection.QuerySingleAsync<int>(sql1, new { subjCode = newInfo.SubjCode, branchCode = newInfo.BranchCode });
-				if (cnt >= 1)
+				if (cnt != 0)
 				{
 					errorMsg = "This Subject & Branch Pair Already Enrolled.";
 					return;
 				}
-				await connection.ExecuteAsync(sql2, new { newSubjCode = newInfo.SubjCode, newBranchCode = newInfo.BranchCode, currentDateTime = DateTime.UtcNow, oldSubjCode = oldInfo.SubjCode, oldBranchCode = oldInfo.BranchCode });
+				string sql2 = @"SELECT COUNT(*) FROM Subjects_Enrollment WHERE subjCode = @subjCode AND branchCode = @branchCode AND active_bit = 0";
+				cnt = await connection.QuerySingleAsync<int>(sql2, new { subjCode = newInfo.SubjCode, branchCode = newInfo.BranchCode });
+				if (cnt != 0)
+				{
+
+					string sql3 = @"UPDATE Subjects_Enrollment SET active_bit = 0, update_on = @currentDateTime WHERE subjCode = @oldSubjCode AND branchCode = @oldBranchCode";
+					await connection.ExecuteAsync(sql3, new { currentDateTime = DateTime.UtcNow, oldSubjCode = oldInfo.SubjCode, oldBranchCode = oldInfo.BranchCode });
+					string sql4 = @"UPDATE Subjects_Enrollment SET active_bit = 1, update_on = @currentDateTime WHERE subjCode = @newSubjCode AND branchCode = @newBranchCode";
+					await connection.ExecuteAsync(sql4, new { currentDateTime = DateTime.UtcNow, newSubjCode = newInfo.SubjCode, newBranchCode = newInfo.BranchCode});
+				}
+				else
+				{
+					string sql3 = @"UPDATE Subjects_Enrollment SET subjCode = @newSubjCode, branchCode = @newBranchCode, update_on = @currentDateTime WHERE subjCode = @oldSubjCode AND branchCode = @oldBranchCode";
+					await connection.ExecuteAsync(sql3, new { newSubjCode = newInfo.SubjCode, newBranchCode = newInfo.BranchCode, currentDateTime = DateTime.UtcNow, oldSubjCode = oldInfo.SubjCode, oldBranchCode = oldInfo.BranchCode });
+				}
 
 			}
 			catch (Exception ex)
