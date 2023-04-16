@@ -1,3 +1,2 @@
 # SKSchool
-Internship Task
-Project Using Razor Pages
+Internship Task | Project Using Razor Pages
